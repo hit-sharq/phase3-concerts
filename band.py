@@ -57,7 +57,25 @@ class Band:
             return True
         else:
             return False
-
+    def all_introductions(self):
+        conn = get_connection()
+        if conn is not None:
+            cur = conn.cursor()
+            cur.execute(('''
+                SELECT band.hometown,
+                         venue.city,
+                         band.name            
+                FROM concert
+                INNER JOIN band ON concert.band_id = band.band_id
+                INNER JOIN venue ON venue.venue_id = concert.venue_id
+                WHERE band.band_id= %s
+                
+            '''), (self.id,))
+            hometown = cur.fetchone()
+            cur.close()
+            conn.close()
+            return f"Hello {hometown[1]}!!!!! We are {hometown[2]} and we're from {hometown[0]}"
 first_band = Band(1)
 print(f"venues by {first_band.venues()}")
 first_band.play_in_venue(1, "2", "RHEMA FESTIVAL")
+print(f"{first_band.all_introductions()}")

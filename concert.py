@@ -1,8 +1,12 @@
 from db_connection import get_connection
 
 class Concert:
-    def __init__(self, id):
+    def __init__(self, id, hometown="",  city="", band_name="",):
         self.id = id
+        self.hometown = hometown
+        self.city = city
+        self.band_name = band_name
+
     
     def band(self):
         conn = get_connection()
@@ -44,8 +48,8 @@ class Concert:
             cur = conn.cursor()
             cur.execute(('''
                 SELECT band.hometown,
-                         venue.city
-                         
+                         venue.city,
+                         band.name            
                 FROM concert
                 INNER JOIN band ON concert.band_id = band.band_id
                 INNER JOIN venue ON venue.venue_id = concert.venue_id
@@ -55,6 +59,9 @@ class Concert:
             hometown = cur.fetchone()
             cur.close()
             conn.close()
+            self.hometown = hometown[0]
+            self.city = hometown[1]
+            self.band_name = hometown[2]
             return True if hometown[0]==hometown[1] else False  if hometown else None
         else:
             return None
@@ -62,26 +69,8 @@ class Concert:
 #Band.all_introductions():returns "{Hello {venue city}!!!!! We are {band name} and we're from {band hometown}"
 # 
     def intoduction(self):
-         conn = get_connection()
-         if conn is not None:
-             cur = conn.cursor()
-             cur.execute(('''
-                SELECT band.hometown,
-                         venue.city
-                         
-                FROM concert
-                INNER JOIN band ON concert.band_id = band.band_id
-                INNER JOIN venue ON venue.venue_id = concert.venue_id
-                WHERE concert.concert_id= %s
-            '''), (self.id,))
-             introduction = cur.fetchone()
-             cur.close()
-             conn.close()
-             return introduction[0] if introduction else None
-         else:
-             return None  
-
-
+         return f"Hello {self.city}!!!!! We are {self.band_name} and we're from {self.hometown}"
+        
 
     def most_performances(self):
          conn = get_connection()
